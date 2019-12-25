@@ -66,8 +66,8 @@ void draw() {
           float y = j*height/16;
           verticesTZ[i] = serialInArray[j*16+i];// data moved. put the x array(->verticesTZ[16])
           // every each one row saved
-          
           vertices[i][j].z += (verticesTZ[i]-vertices[i][j].z)*ease; //ease = 0.75
+                            // verticesTZ[i] : is the lastest Serial saved data  vs vertices[i][j].z : is the last data saved 
           vertex( vertices[i][j].x, vertices[i][j].y, vertices[i][j].z);
           vertex( vertices[i][j+1].x, vertices[i][j+1].y, vertices[i][j+1].z);
         }
