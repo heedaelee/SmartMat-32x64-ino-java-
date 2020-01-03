@@ -1,12 +1,12 @@
 //Mux control pins for analog signal (SIG_pin) default for arduino mini pro
-//디지털 입출력 핀 
+//디지털 입출력 핀 //칼럼
 const byte s0 = 10;
 const byte s1 = 16;
 const byte s2 = 14;
 const byte s3 = 15;
 
 //Mux control pins for Output signal (OUT_pin) default for arduino mini pro
-//디지털 입출력 핀 
+//디지털 입출력 핀 //로우
 const byte w0 = 9; 
 const byte w1 = 8; 
 const byte w2 = 7;
@@ -140,7 +140,6 @@ void loop(){
   //Loop through and read all 16 values
   //Reports back Value at channel 6 is: 346
   if (Serial.available() > 0){
-    Serial.println("test");
     inByte = Serial.read();//처음 start letter
     
     if(inByte == 'A'){
@@ -187,7 +186,7 @@ int readMux(byte channel){
   //read the value at the SIG pin
   
   int val = analogRead(SIG_pin);
-  //  Serial.println(val);
+//    Serial.println(val);
   //return the value
   return val;
 }
