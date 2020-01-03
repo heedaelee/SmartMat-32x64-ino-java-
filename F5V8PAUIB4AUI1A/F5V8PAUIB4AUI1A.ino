@@ -1,24 +1,24 @@
 //Mux control pins for analog signal (SIG_pin) default for arduino mini pro
 //디지털 입출력 핀 
-const byte s0 = 15;
-const byte s1 = 14;
-const byte s2 = 16;
-const byte s3 = 10;
+const byte s0 = 10;
+const byte s1 = 16;
+const byte s2 = 14;
+const byte s3 = 15;
 
 //Mux control pins for Output signal (OUT_pin) default for arduino mini pro
 //디지털 입출력 핀 
 const byte w0 = 9; 
-const byte w1 = 8;
+const byte w1 = 8; 
 const byte w2 = 7;
 const byte w3 = 6;                                                                           
-
+     
 //Mux in "SIG" pin default for arduino mini pro 
 //col 아날로그 데이터 입력핀 mc : 0번핀(A0)
-const byte SIG_pin = 0; 
+const byte SIG_pin = A0; 
 
 //Mux out "SIG" pin default for arduino mini pro
 //row 아날로그 데이터 입력핀 mc : 4번핀(A6)
-const byte OUT_pin = 5;
+const byte OUT_pin = A3;
 
 //Row and Column pins default for arduino mini pro
 //STATUS_pin 상황핀, setup에서 HIGH 줌,  if mc : 디지털 입출력 2,3 핀 사용
@@ -50,10 +50,10 @@ const boolean muxChannel[16][4]={
 int inByte = 0;
 
 int valor = 0;               //variable for sending bytes to processing
-int calibra[15][15];         //Calibration array for the min values of each od the 225 sensors.
+int calibra[16][16];         //Calibration array for the min values of each od the 225 sensors.
 int minsensor=254;          //Variable for staring the min array
 int multiplier = 254;
-int pastmatrix[15][15];
+//int pastmatrix[16][16];
 
 void setup(){
     
@@ -96,8 +96,11 @@ void setup(){
   // Full of 0's of initial matrix
   for(byte j = 0; j < 16; j ++){ 
     writeMux(j);
-    for(byte i = 0; i < 16; i ++)
+    for(byte i = 0; i < 16; i ++){
       calibra[j][i] = 0; //초기값 0 주입
+//      Serial.println("cali 확인"); 
+//      Serial.print(calibra[j][i]);
+      }
   }
   
   // Calibration
@@ -116,7 +119,7 @@ void setup(){
       calibra[j][i] = calibra[j][i]/50; //calibra 후 기본값/50 해서 대입 -> 작은수로 만듦      
       if(calibra[j][i] < minsensor)
         minsensor = calibra[j][i]; //센서 최소값
-      Serial.print(calibra[j][i]); //작은수로 캘리 된 값 출력 후 간격 Tab
+      Serial.print(calibra[j][i]); //최소값 출력
       Serial.print("\t");
     }
   Serial.println(); 
@@ -137,6 +140,7 @@ void loop(){
   //Loop through and read all 16 values
   //Reports back Value at channel 6 is: 346
   if (Serial.available() > 0){
+    Serial.println("test");
     inByte = Serial.read();//처음 start letter
     
     if(inByte == 'A'){
@@ -146,7 +150,6 @@ void loop(){
         
         for(int i = 0; i < 15; i++){
           valor = readMux(i); //int
-          
           //Saturation sensors, 최대값 조절
           int limsup = 450;
           if(valor > limsup)
@@ -163,6 +166,7 @@ void loop(){
             valor = 254;
           
           Serial.write(valor);
+//          Serial.println(valor);
           digitalWrite(COL_pin,!digitalRead(COL_pin)); //column pin 반전,LOW->HIGH
         } 
       }
@@ -181,8 +185,9 @@ int readMux(byte channel){
   }
 
   //read the value at the SIG pin
-  int val = analogRead(SIG_pin);
   
+  int val = analogRead(SIG_pin);
+  //  Serial.println(val);
   //return the value
   return val;
 }
@@ -198,7 +203,7 @@ void writeMux(byte channel){//ch 0~14 for loop, mat row
 
 void establishContact() {
   while (Serial.available() <= 0) {
-    Serial.print('A');   // send a capital A
+    Serial.write('A');   // send a capital A
     delay(300);
   }
 }

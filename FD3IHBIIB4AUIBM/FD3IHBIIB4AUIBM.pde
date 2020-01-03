@@ -37,7 +37,7 @@ void setup() {
   // Open whatever port is the one you're using.
   
   //depending on computers.. select port
-  myPort = new Serial(this, Serial.list()[2], 115200);
+  myPort = new Serial(this, Serial.list()[0], 115200);
   
   for (int j = 0; j < 16; j++) {
         for (int i = 0; i < 16; i++) {
@@ -79,8 +79,10 @@ void draw() {
 }
 
 void serialEvent(Serial myPort) {
+  
   // read a byte from the serial port:
   int inByte = myPort.read();
+  //println("serial ok"+inByte);
   // if this is the first byte received, and it's an A,
   // clear the serial buffer and note that you've
   // had first contact from the microcontroller. 
@@ -99,7 +101,7 @@ void serialEvent(Serial myPort) {
     serialCount++;
 
     // If we have 3 bytes:
-    if (serialCount > 224 ) {
+    if (serialCount > 255 ) {
       println(millis()-tiempoant);
       tiempoant = millis();
       
