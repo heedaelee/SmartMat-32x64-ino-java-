@@ -42,7 +42,7 @@ const boolean muxChannel[16][4]={
     {0,0,1,1}, //channel 12
     {1,0,1,1}, //channel 13
     {0,1,1,1}, //channel 14
-    {1,1,1,1}  //channel 15 //15x15 so, unused
+    {1,1,1,1}  //channel 15 
   };
 
 
@@ -51,7 +51,7 @@ int inByte = 0;
 
 int valor = 0;               //variable for sending bytes to processing
 int calibra[16][16];         //Calibration array for the min values of each od the 225 sensors.
-int minsensor=254;          //Variable for staring the min array
+int minsensor=254;          //Variable for starting the min array
 int multiplier = 254;
 //int pastmatrix[16][16];
 
@@ -96,7 +96,7 @@ void setup(){
   // Full of 0's of initial matrix
   for(byte j = 0; j < 16; j ++){ 
     writeMux(j);
-    for(byte i = 0; i < 16; i ++){
+    for(byte i = 0; i < 16; i++){
       calibra[j][i] = 0; //초기값 0 주입
 //      Serial.println("cali 확인"); 
 //      Serial.print(calibra[j][i]);
@@ -145,10 +145,10 @@ void loop(){
     
     if(inByte == 'A'){
     
-      for(int j = 15; j >= 0; j--){ //왜 15부터?? -> 16x16이니까.
+      for(int j = 15; j >= 0; j--){ //왜 15부터?? -> 기존 개발자가 역순으로 순서를 바꿈
         writeMux(j);
         
-        for(int i = 0; i < 15; i++){
+        for(int i = 0; i < 16; i++){// 15 -> 16  수정 1/3
           valor = readMux(i); //int
           //Saturation sensors, 최대값 조절
           int limsup = 450;

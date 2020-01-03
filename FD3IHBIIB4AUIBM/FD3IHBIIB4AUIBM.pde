@@ -101,7 +101,7 @@ void serialEvent(Serial myPort) {
     serialCount++;
 
     // If we have 3 bytes:
-    if (serialCount > 255 ) {
+    if (serialCount >= 256 ) {
       println(millis()-tiempoant);
       tiempoant = millis();
       
