@@ -1,4 +1,4 @@
-// This example code is in the public domain.
+// i'm edtting  1. changing from 3D to 2D using 32x32 source, 2. add dump,
 
 import processing.serial.*;
 import processing.opengl.*;
@@ -6,8 +6,12 @@ import processing.opengl.*;
 
 int bgcolor;                 // Background color
 int fgcolor;                 // Fill color
-Serial myPort;                       // The serial port
-int[] serialInArray = new int[256];    // Where we'll put what we receive
+Serial myPort;               // The serial port
+int NUM_COLUMN = 16;         // Matirx array constant.
+int NUM_ROW = 16;
+int NUM_SENSOR = NUM_COLUMN * NUM_ROW;
+//int[] serialInArray = new int[256];// Where we'll put what we receive
+int[][] serialInArray = new int[NUM_COLUMN][NUM_ROW];
 int[] pastInArray = new int [256];
 float[][] colorTarget   = new float[3][255];
 float[][] currentColor   = new float[3][255];
@@ -44,8 +48,7 @@ void setup() {
             vertices[i][j] = new PVector( i*w, j*w, 0); //w=30
           //16x16
         }
-    }
-      
+    }      
 }
 
 void draw() {
@@ -96,16 +99,20 @@ void serialEvent(Serial myPort) {
   } else {
     // Add the latest byte from the serial port to array:
 
-      serialInArray[serialCount] = inByte;
-
-    serialCount++;
-
+      //serialInArray[serialCount] = inByte;
+      for(int i=0; i<NUM_ROW; i++){
+        for(int j=0; j<NUM_COLUMN; j++){
+          serialInArray[i][j] = inByte;
+          serialCount++;
+        }
+      }
+      
     // If we have 3 bytes:
     if (serialCount >= 256 ) {
       println(millis()-tiempoant);
       tiempoant = millis();
       
-      render = 1;
+      render = 1; // allow to render !!
     
       // Send a capital A to request new sensor readings:
       myPort.write('A');
