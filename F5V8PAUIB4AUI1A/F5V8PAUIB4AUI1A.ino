@@ -51,9 +51,7 @@ int inByte = 0;
 
 int valor = 0;               //variable for sending bytes to processing
 int calibra[16][16];         //Calibration array for the min values of each od the 225 sensors.
-int minsensor=254;          //Variable for starting the min array
-int multiplier = 254;
-//int pastmatrix[16][16];
+int initMaximum=0;          //Variable for starting the min array
 
 void setup(){
     
@@ -116,18 +114,18 @@ void setup(){
   for(byte j = 0; j < 16; j ++){ 
     writeMux(j); //초기 test, row
     for(byte i = 0; i < 16; i ++){
-      calibra[j][i] = calibra[j][i]/50; //calibra 후 기본값/50 해서 대입 -> 작은수로 만듦      
-      if(calibra[j][i] < minsensor)
-        minsensor = calibra[j][i]; //센서 최소값
-      Serial.print(calibra[j][i]); //최소값 출력
+      calibra[j][i] = calibra[j][i]/50; //calibra 후 기본값/50 해서 대입 -> 평균을 만듦
+      if(calibra[j][i] > initMaximum)
+        initMaximum = calibra[j][i]; //초기 최대값
+      Serial.print(calibra[j][i]); 
       Serial.print("\t");
     }
   Serial.println(); 
   }
   
   Serial.println();
-  Serial.print("Minimum Value: ");
-  Serial.println(minsensor);
+  Serial.print("initMaximum Value: ");
+  Serial.println(initMaximum); //초기 최대값
   Serial.println();
   
   establishContact();// send a byte to establish contact until receiver responds
@@ -143,31 +141,35 @@ void loop(){
     inByte = Serial.read();//처음 start letter
     
     if(inByte == 'A'){
-    
+//      Serial.print("start & initMaximum : ");
+//      Serial.print(initMaximum);
+//      Serial.println();
       for(int j = 15; j >= 0; j--){ //왜 15부터?? -> 기존 개발자가 역순으로 순서를 바꿈
         writeMux(j);
         
         for(int i = 0; i < 16; i++){// 15 -> 16  수정 1/3
           valor = readMux(i); //int
+//          Serial.print(valor);
+//          Serial.print(" ");
           //Saturation sensors, 최대값 조절
-          int limsup = 450;
-          if(valor > limsup)
-            valor = limsup;
-            
-          if(valor < calibra[j][i])//기본값이 calibra[][]
-            valor = calibra[j][i];  
+          int maximum = 1024;
+
+          valor = map(valor,initMaximum, maximum,0,100); 
+          //아두이노 연결후(압력주기 전) 초기 max값을 최소값으로, 1024를 최대값으로 Calibration 함
           
-          valor = map(valor,minsensor, limsup,1,254); //1~254까지 calibration
-          
-          if(valor < 150)
+          if(valor < 0)
             valor = 0; //값의 최소 최대 조절
-          if(valor > 254) //150~254
-            valor = 254;
+          if(valor > 100) //0~100
+            valor = 100;
           
           Serial.write(valor);
-//          Serial.println(valor);
+//        시리얼프린터 출력
+//          Serial.print(valor);
+//          Serial.print(" ");
+          
           digitalWrite(COL_pin,!digitalRead(COL_pin)); //column pin 반전,LOW->HIGH
-        } 
+        }
+//          Serial.println(); 
       }
     }
         

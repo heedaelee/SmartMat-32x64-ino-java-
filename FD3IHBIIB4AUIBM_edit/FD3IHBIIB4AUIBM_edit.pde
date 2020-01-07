@@ -9,9 +9,6 @@ import static javax.swing.JOptionPane.*;
 ControlP5 cp5;
 PFont font;
 
-int bgcolor;                 // Background color
-int fgcolor;                 // Fill color
-
 // Matirx array constant.
 int NUM_COLUMN = 16;
 int NUM_ROW = 16;
@@ -58,12 +55,12 @@ int minBtnHeight;
 String portName;
 String COMlist [] = new String[Serial.list().length];
 
-final boolean debug = true;
+final boolean serialConn = true;
 
 void settings() {
   // Set size of window : size(width, Height)
   size(40 + one_recSize_space * NUM_COLUMN, 80 + one_recSize_space * NUM_ROW);
-  
+
   //button location assignment
   sBtnX = width*1/4;
   sBtnY = height*1/20;
@@ -119,38 +116,40 @@ void setup() {
   // draw Sensitivity slider button  
   cp5.addSlider("minusConst").setCaptionLabel("Sensitivity")
     .setRange(10, 200)
-    .setPosition(minBtnX,  minBtnY+20)
+    .setPosition(minBtnX, minBtnY+20)
     .setSize(minBtnWidth, minBtnHeight);
 
   // Select serial port.
-  try {
-    if (debug) printArray(Serial.list());// Show up all possible serial ports.
-    int i = Serial.list().length;
-    if (i != 0) {
-      // need to check which port the inst uses , for now we'll just let the user decide
-      for (int j = 0; j < i; j++ ) {
-        COMlist[j] = Serial.list()[j];
-        println(COMlist[j]);
+  if (serialConn) {
+    try {
+      printArray(Serial.list());// Show up all possible serial ports.
+      int i = Serial.list().length;
+      if (i != 0) {
+        // need to check which port the inst uses , for now we'll just let the user decide
+        for (int j = 0; j < i; j++ ) {
+          COMlist[j] = Serial.list()[j];
+          println(COMlist[j]);
+        }
+
+        portName = (String)showInputDialog(null, "포트를 선택해 주세요.", "메시지", INFORMATION_MESSAGE, null, COMlist, COMlist[0]);
+        println("portName : "+portName);
+        if (portName == null) exit();
+        if (portName.isEmpty()) exit();
+
+        if (serialConn) println(portName);
+        myPort = new Serial(this, portName, 115200); // change baud rate to your liking
+        //myPort.clear();
+      } else {
+        showMessageDialog(frame, "PC에 연결된 포트가 없습니다");
+        exit();
       }
-
-      portName = (String)showInputDialog(null, "포트를 선택해 주세요.", "메시지", INFORMATION_MESSAGE, null, COMlist, COMlist[0]);
-      println("portName : "+portName);
-      if (portName == null) exit();
-      if (portName.isEmpty()) exit();
-
-      if (debug) println(portName);
-      myPort = new Serial(this, portName, 115200); // change baud rate to your liking
-      //myPort.clear();
-    } else {
-      showMessageDialog(frame, "PC에 연결된 포트가 없습니다");
+    }
+    catch (Exception e)
+    { //Print the type of error 
+      showMessageDialog(frame, "COM port 를 사용할 수 없습니다. \n (maybe in use by another program)");
+      println("Error:", e);
       exit();
     }
-  }
-  catch (Exception e)
-  { //Print the type of error 
-    showMessageDialog(frame, "COM port 를 사용할 수 없습니다. \n (maybe in use by another program)");
-    println("Error:", e);
-    exit();
   }
 }
 
@@ -188,44 +187,52 @@ void draw() {
 int minusConst = 150;
 int loadingTime = 3600;
 
+
 void serialEvent(Serial myPort) {
-
-  // read a byte from the serial port:
-  int inByte = myPort.read();
-  //println("serial ok"+inByte);
-  // if this is the first byte received, and it's an A,
-  // clear the serial buffer and note that you've
-  // had first contact from the microcontroller. 
-  // Otherwise, add the incoming byte to the array:
-  if (firstContact == false) {
-    if (inByte == 'A') { 
-      myPort.clear();          // clear the serial port buffer
-      firstContact = true;     // you've had first contact from the microcontroller
-      myPort.write('A');       // ask for more
-    }
-  } else {
-    // Add the latest byte from the serial port to array:
-    // In here, no 'A', because in arduino, if found 'A', send again 'Serial.write(valor);' so i think pure number in data. 
-    serialInArray[serialCount] = inByte;
-    serialCount++;
-
-    // If we have 
-    if (serialCount >= 256 ) {
-      println(millis()-tiempoant);
-      tiempoant = millis();
-      render = 1; // allow to render !!
-
-      for (int i=0; i<NUM_ROW; i++) {
-        for (int j=0; j<NUM_COLUMN; j++) {
-          temp[j] = serialInArray[i*16+j]; //array 1 dimension -> 2 dimension
-          data[i][j] = temp[j];
-        }
+  if (serialConn) {
+    // read a byte from the serial port:
+    int inByte = myPort.read();
+    //println("serial ok"+inByte);
+    // if this is the first byte received, and it's an A,
+    // clear the serial buffer and note that you've
+    // had first contact from the microcontroller. 
+    // Otherwise, add the incoming byte to the array:
+    if (firstContact == false) {
+      if (inByte == 'A') { 
+        myPort.clear();          // clear the serial port buffer
+        firstContact = true;     // you've had first contact from the microcontroller
+        myPort.write('A');       // ask for more
       }
+    } else {
+      // Add the latest byte from the serial port to array:
+      // In here, no 'A', because in arduino, if found 'A', send again 'Serial.write(valor);' so i think pure number in data. 
+      serialInArray[serialCount] = inByte;
+      serialCount++;
 
-      // Send a capital A to request new sensor readings:
-      myPort.write('A');
-      // Reset serialCount:
-      serialCount = 0;
+      // If we have 
+      if (serialCount >= 256 ) {
+        println(millis()-tiempoant);
+        tiempoant = millis();
+        render = 1; // allow to render !!
+
+        TableRow newRow = table.addRow();
+        newRow.setString("TimeStamp", timeStamp(millis()));
+
+        for (int i=0; i<NUM_ROW; i++) {
+          for (int j=0; j<NUM_COLUMN; j++) {
+            temp[j] = serialInArray[i*16+j]; //array 1 dimension -> 2 dimension
+            data[i][j] = temp[j];
+
+            String columnName = "(" + i + "," + j + ")";
+            newRow.setInt(columnName, data[i][j]);
+          }
+        }
+
+        // Send a capital A to request new sensor readings:
+        myPort.write('A');
+        // Reset serialCount:
+        serialCount = 0;
+      }
     }
   }
 }
