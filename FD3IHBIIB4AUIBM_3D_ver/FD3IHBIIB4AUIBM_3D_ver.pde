@@ -82,6 +82,7 @@ void serialEvent(Serial myPort) {
   
   // read a byte from the serial port:
   int inByte = myPort.read();
+  //println(inByte);
   //println("serial ok"+inByte);
   // if this is the first byte received, and it's an A,
   // clear the serial buffer and note that you've

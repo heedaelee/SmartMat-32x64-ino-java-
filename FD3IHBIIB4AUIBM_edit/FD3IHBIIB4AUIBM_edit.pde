@@ -13,14 +13,14 @@ int bgcolor;                 // Background color
 int fgcolor;                 // Fill color
 
 // Matirx array constant.
-int NUM_COLUMN = 32;
-int NUM_ROW = 32;
+int NUM_COLUMN = 16;
+int NUM_ROW = 16;
 int NUM_SENSOR = NUM_COLUMN * NUM_ROW;
 int one_recSize_space = 14;
 float one_recSize = 11.5;
 
 Serial myPort;               // The serial port
-//int[] data = new int[256];// Where we'll put what we receive
+int[] serialInArray = new int[256];    // Where we'll put what we receive
 int[][] data = new int[NUM_COLUMN][NUM_ROW];
 
 Table table;
@@ -55,14 +55,21 @@ String COMlist [] = new String[Serial.list().length];
 
 final boolean debug = true;
 
-void setup() {
+void settings() {
   // Set size of window : size(width, Height)
   size(40 + one_recSize_space * NUM_COLUMN, 80 + one_recSize_space * NUM_ROW);
+}
+
+void setup() {
 
   // Set frame rate.
   frameRate(100);
 
   font = createFont("Arial Bold", 48);
+
+  //Create csv first row's column
+  table = new Table();
+  table.addColumn("TimeStamp");
 
   for (int i=0; i<NUM_ROW; i++) {
     for (int j=0; j<NUM_COLUMN; j++) {
@@ -91,13 +98,13 @@ void setup() {
   resetBtn.getCaptionLabel().setFont(font).setSize(13);
 
   // draw minInterval slider button
-    cp5.addSlider("minInterval").setCaptionLabel("Min_Interval")
+  cp5.addSlider("minInterval").setCaptionLabel("Min_Interval")
     .setRange(100, 1000)
     .setPosition(width-120, 30)
     .setSize(40, 15);
 
   // draw Sensitivity slider button  
-    cp5.addSlider("minusConst").setCaptionLabel("Sensitivity")
+  cp5.addSlider("minusConst").setCaptionLabel("Sensitivity")
     .setRange(10, 200)
     .setPosition(width-120, 50)
     .setSize(40, 15);
@@ -187,60 +194,21 @@ void serialEvent(Serial myPort) {
   } else {
     // Add the latest byte from the serial port to array:
     // In here, no 'A', because in arduino, if found 'A', send again 'Serial.write(valor);' so i think pure number in data. 
-
-    try {
-      passedTime = millis() - savedTime;
-      //making new row data after loadingTime, and per minIntervals.
-      if (millis()>loadingTime && passedTime > minInterval) {
-        TableRow newRow = table.addRow();
-        newRow.setString("TimeStamp", timeStamp(millis()));    
-        for (int i=0; i<NUM_ROW; i++) {
-          for (int j=0; j<NUM_COLUMN; j++) {
-            data[i][j] = inByte-minusConst;
-            //data[i][j] = inByte; //150~254
-            serialCount++;
-
-            //converting minus datas to 0
-            if (data[i][j]<0) { 
-              data[i][j] = 0;
-            }
-            //insert data
-            String columnName = "(" + i + "," + j + ")";
-            newRow.setInt(columnName, data[i][j]);
-          }
-        }    
-        //renewal
-        savedTime = millis();
-      } else {
-        //println("passedTime : " + passedTime);
-        // Data re-arrangement to matrix.
-        for (int i=0; i<NUM_ROW; i++) {    
-          for (int j=0; j<NUM_COLUMN; j++) {        
-            data[i][j] = inByte-minusConst;
-            //data[i][j] = inByte; 
-            serialCount++;
-          }
-        }
-      }
-    }
-    catch (Exception e) {
-      e.printStackTrace();
-    }
-
-    //data[serialCount] = inByte;
-    //for (int i=0; i<NUM_ROW; i++) {
-    //  for (int j=0; j<NUM_COLUMN; j++) {
-    //    data[i][j] = inByte;
-    //    serialCount++;
-    //  }
-    //}
+    serialInArray[serialCount] = inByte;
+    serialCount++;
 
     // If we have 3 bytes:
     if (serialCount >= 256 ) {
       println(millis()-tiempoant);
       tiempoant = millis();
-
       render = 1; // allow to render !!
+
+      
+      for (int i=0; i<NUM_ROW; i++) {
+        for (int j=0; j<NUM_COLUMN; j++) {
+          data[i][j] = serialInArray; //array 1 -> 2
+        }
+      }
 
       // Send a capital A to request new sensor readings:
       myPort.write('A');
