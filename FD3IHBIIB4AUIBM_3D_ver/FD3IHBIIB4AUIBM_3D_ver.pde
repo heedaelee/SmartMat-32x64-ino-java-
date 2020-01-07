@@ -56,19 +56,18 @@ void draw() {
     rotateX(0.5);//x-yis a bit rotate
     //rotateX(PI/10);
     background(0);
-    for (int j=0; j<15; j++) { //j is row
+    for (int j=0; j<15; j++) { //j can be used for row or col. 0~14 rotated. so, 64 line: by row, 71 line : col
       beginShape(QUAD_STRIP);
-      for (int i=0; i<16; i++) { //i is column
+      for (int i=0; i<16; i++) { //maybe i can be used for row or col. 0~15 rotated. so, 64 line : by col, 71 line :row
           stroke(255);
      
-          fill(serialInArray[j*16+i], 0, 0); //mayb row is j, col is i, and draw[15][16]
-          float x = i*width/16;
-          float y = j*height/16;
+          fill(serialInArray[j*16+i], 0, 0); //draw[16][16], 14*16+16 = 240,why???????fu**  16*16 = 256 
+
           verticesTZ[i] = serialInArray[j*16+i];// data moved. put the x array(->verticesTZ[16])
           // every each one row saved
           vertices[i][j].z += (verticesTZ[i]-vertices[i][j].z)*ease; //ease = 0.75
                             // verticesTZ[i] : is the lastest Serial saved data  vs vertices[i][j].z : is the last data saved 
-          vertex( vertices[i][j].x, vertices[i][j].y, vertices[i][j].z);
+          vertex( vertices[i][j].x, vertices[i][j].y, vertices[i][j].z); //2 vertex -> in x-axis, draw line between x and x+1  
           vertex( vertices[i][j+1].x, vertices[i][j+1].y, vertices[i][j+1].z);
         }
          endShape(CLOSE);

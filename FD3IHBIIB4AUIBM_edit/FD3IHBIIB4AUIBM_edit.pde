@@ -22,6 +22,7 @@ float one_recSize = 11.5;
 Serial myPort;               // The serial port
 int[] serialInArray = new int[256];    // Where we'll put what we receive
 int[][] data = new int[NUM_COLUMN][NUM_ROW];
+int[] temp = new int[16];
 
 Table table;
 
@@ -45,10 +46,14 @@ int mn;  // Values from 0 - 59
 int h;    // Values from 0 - 23
 
 //button
-int sBtnX = 180;
-int sBtnY = 25;
+int sBtnX;
+int sBtnY;
 int sBtnWidth = 60;
 int sBtnHeight = 30;
+int minBtnX;
+int minBtnY;
+int minBtnWidth;
+int minBtnHeight;
 
 String portName;
 String COMlist [] = new String[Serial.list().length];
@@ -58,6 +63,14 @@ final boolean debug = true;
 void settings() {
   // Set size of window : size(width, Height)
   size(40 + one_recSize_space * NUM_COLUMN, 80 + one_recSize_space * NUM_ROW);
+  
+  //button location assignment
+  sBtnX = width*1/4;
+  sBtnY = height*1/20;
+  minBtnX = width*7/10;
+  minBtnY = height*3/20;
+  minBtnWidth = sBtnWidth*2/3;
+  minBtnHeight = sBtnHeight*1/2;
 }
 
 void setup() {
@@ -100,14 +113,14 @@ void setup() {
   // draw minInterval slider button
   cp5.addSlider("minInterval").setCaptionLabel("Min_Interval")
     .setRange(100, 1000)
-    .setPosition(width-120, 30)
-    .setSize(40, 15);
+    .setPosition(minBtnX, minBtnY)
+    .setSize(minBtnWidth, minBtnHeight);
 
   // draw Sensitivity slider button  
   cp5.addSlider("minusConst").setCaptionLabel("Sensitivity")
     .setRange(10, 200)
-    .setPosition(width-120, 50)
-    .setSize(40, 15);
+    .setPosition(minBtnX,  minBtnY+20)
+    .setSize(minBtnWidth, minBtnHeight);
 
   // Select serial port.
   try {
@@ -143,7 +156,6 @@ void setup() {
 
 void draw() {
   if (render==1) {
-
     // Set background color as gray.
     background(100);    
 
@@ -197,16 +209,16 @@ void serialEvent(Serial myPort) {
     serialInArray[serialCount] = inByte;
     serialCount++;
 
-    // If we have 3 bytes:
+    // If we have 
     if (serialCount >= 256 ) {
       println(millis()-tiempoant);
       tiempoant = millis();
       render = 1; // allow to render !!
 
-      
       for (int i=0; i<NUM_ROW; i++) {
         for (int j=0; j<NUM_COLUMN; j++) {
-          data[i][j] = serialInArray; //array 1 -> 2
+          temp[j] = serialInArray[i*16+j]; //array 1 dimension -> 2 dimension
+          data[i][j] = temp[j];
         }
       }
 
