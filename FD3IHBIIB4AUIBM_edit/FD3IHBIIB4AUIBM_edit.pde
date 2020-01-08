@@ -10,28 +10,25 @@ ControlP5 cp5;
 PFont font;
 
 // Matirx array constant.
-int NUM_COLUMN = 16;
-int NUM_ROW = 16;
+int NUM_COLUMN = 32;
+int NUM_ROW = 64;
 int NUM_SENSOR = NUM_COLUMN * NUM_ROW;
-int one_recSize_space = 14;
-float one_recSize = 11.5;
+
 
 Serial myPort;               // The serial port
 int[] serialInArray = new int[256];    // Where we'll put what we receive
-int[][] data = new int[NUM_COLUMN][NUM_ROW];
+int[][] data = new int[NUM_ROW][NUM_COLUMN];
 int[] temp = new int[16];
 
 Table table;
 
 //Set-up interval saving time
-int startedTime;
 int savedTime;
 int minInterval = 500; //1s = 1000
 int passedTime;
 
 int serialCount = 0;                 // A count of how many bytes we receive
 boolean firstContact = false;        // Whether we've heard from the microcontroller
-int tiempoant;
 int render=0;
 
 // Variables for current date & time.
@@ -42,32 +39,51 @@ int s;  // Values from 0 - 59
 int mn;  // Values from 0 - 59
 int h;    // Values from 0 - 23
 
+//layout
+int sideSpace = 80;
+int upperSpace = 80;
+int belowSpace = 20;
+int one_recSize_space = 14;
+float one_recSize = 11.5;
+int firstyLayer1 = 40;
+
 //button
 int sBtnX;
 int sBtnY;
+int rBtnX;
+int rBtnY;
 int sBtnWidth = 60;
 int sBtnHeight = 30;
+int btnSpace = 10;
 int minBtnX;
 int minBtnY;
 int minBtnWidth;
 int minBtnHeight;
+int timeTextX;
+int timeTextY;
+
 
 String portName;
 String COMlist [] = new String[Serial.list().length];
 
-final boolean serialConn = true;
+final boolean serialConn = false;
 
 void settings() {
   // Set size of window : size(width, Height)
-  size(40 + one_recSize_space * NUM_COLUMN, 80 + one_recSize_space * NUM_ROW);
+  size(sideSpace + one_recSize_space * NUM_COLUMN, upperSpace + belowSpace + one_recSize_space * NUM_ROW);
 
   //button location assignment
-  sBtnX = width*1/4;
-  sBtnY = height*1/20;
-  minBtnX = width*7/10;
-  minBtnY = height*3/20;
+  sBtnX = sideSpace/2 + (one_recSize_space * NUM_COLUMN-(sBtnWidth*2+10))/2;
+  sBtnY = firstyLayer1-10;
+  rBtnX = sBtnX+sBtnWidth+btnSpace;
+  rBtnY = sBtnY;
+  minBtnX = rBtnX+sBtnWidth+width/8;
+  minBtnY = sBtnY;
   minBtnWidth = sBtnWidth*2/3;
   minBtnHeight = sBtnHeight*1/2;
+  timeTextX = minBtnX;
+  timeTextY = height/40;
+  
 }
 
 void setup() {
@@ -76,7 +92,6 @@ void setup() {
   frameRate(100);
 
   font = createFont("Arial Bold", 48);
-
   //Create csv first row's column
   table = new Table();
   table.addColumn("TimeStamp");
@@ -97,13 +112,11 @@ void setup() {
   Button saveBtn= cp5.addButton("SAVE")
     .setPosition(sBtnX, sBtnY)
     .setSize(sBtnWidth, sBtnHeight);
-  //saveBtn.setColorBackground(color(#ffffff));
-  //saveBtn.setColorActive(); when mouse-over
   saveBtn.getCaptionLabel().setFont(font).setSize(13);
 
   // draw reset button
   Button resetBtn= cp5.addButton("RESET")
-    .setPosition(sBtnX+sBtnWidth+10, sBtnY)
+    .setPosition(rBtnX, rBtnY)
     .setSize(sBtnWidth, sBtnHeight);
   resetBtn.getCaptionLabel().setFont(font).setSize(13);
 
@@ -114,8 +127,8 @@ void setup() {
     .setSize(minBtnWidth, minBtnHeight);
 
   // draw Sensitivity slider button  
-  cp5.addSlider("minusConst").setCaptionLabel("Sensitivity")
-    .setRange(10, 200)
+  cp5.addSlider("multiplyConst").setCaptionLabel("Sensitivity")
+    .setRange(1, 28)
     .setPosition(minBtnX, minBtnY+20)
     .setSize(minBtnWidth, minBtnHeight);
 
@@ -138,6 +151,8 @@ void setup() {
 
         if (serialConn) println(portName);
         myPort = new Serial(this, portName, 115200); // change baud rate to your liking
+        // for restart throw A
+        myPort.write('A');
         //myPort.clear();
       } else {
         showMessageDialog(frame, "PC에 연결된 포트가 없습니다");
@@ -154,9 +169,15 @@ void setup() {
 }
 
 void draw() {
-  if (render==1) {
+  if (render==1 || serialConn == false ) {
     // Set background color as gray.
-    background(100);    
+    background(100);
+
+    // Set font size and color.
+    textFont(font, 11);
+    fill(255);
+    getDate();
+    text(str(y)+"."+str(m)+"."+str(d)+". "+str(h)+":"+str(mn)+":"+str(s), timeTextX,timeTextY);
 
     // Set font size and color.
     textFont(font, 10);
@@ -165,17 +186,11 @@ void draw() {
     text("FPS :"+int(frameRate), 20, 60);
     text("Connected port: " + portName, 20, 40);
 
-    // Set font size and color.
-    textFont(font, 11);
-    fill(255);
-    getDate();
-    text(str(y)+"."+str(m)+"."+str(d)+". "+str(h)+":"+str(mn)+":"+str(s), width-120, 20);
-
     //Draw rectangular for sensor indication.
     for (int i=0; i<NUM_ROW; i++) {
       for (int j=0; j<NUM_COLUMN; j++) {
         fill(data[i][j]*14, 0, 0);
-        rect(20+j*one_recSize_space, 70+i*one_recSize_space, one_recSize, one_recSize, 3);
+        rect(sideSpace/2+j*one_recSize_space, upperSpace+i*one_recSize_space, one_recSize, one_recSize, 3);
         //if(i==32&&j==31){text("1", 33+j*one_recSize_space, 68+i*one_recSize_space);}
         //if(i==0&&j==15){text("16", 20+j*one_recSize_space, 65+i*one_recSize_space);}
       }
@@ -184,9 +199,8 @@ void draw() {
   }
 }
 
-int minusConst = 150;
-int loadingTime = 3600;
-
+int multiplyConst = 14;
+int loadingTime = 2500;
 
 void serialEvent(Serial myPort) {
   if (serialConn) {
@@ -211,27 +225,35 @@ void serialEvent(Serial myPort) {
 
       // If we have 
       if (serialCount >= 256 ) {
-        println(millis()-tiempoant);
-        tiempoant = millis();
         render = 1; // allow to render !!
 
-        TableRow newRow = table.addRow();
-        newRow.setString("TimeStamp", timeStamp(millis()));
-
-        for (int i=0; i<NUM_ROW; i++) {
-          for (int j=0; j<NUM_COLUMN; j++) {
-            temp[j] = serialInArray[i*16+j]; //array 1 dimension -> 2 dimension
-            data[i][j] = temp[j];
-
-            String columnName = "(" + i + "," + j + ")";
-            newRow.setInt(columnName, data[i][j]);
+        //if loadingtime, minInterval, then create a row
+        if (millis()>loadingTime && passedTime > minInterval) {
+          TableRow newRow = table.addRow();  
+          newRow.setString("TimeStamp", timeStamp(millis()));
+          for (int i=0; i<NUM_ROW; i++) {
+            for (int j=0; j<NUM_COLUMN; j++) {
+              temp[j] = serialInArray[i*16+j]; //array 1 dimension -> 2 dimension
+              data[i][j] = temp[j];
+              String columnName = "(" + i + "," + j + ")";
+              newRow.setInt(columnName, data[i][j]);
+            }
           }
+          savedTime = millis();
+          // Send a capital A to request new sensor readings:
+          myPort.write('A');
+          // Reset serialCount:
+          serialCount = 0;
+        } else { //just draw, not write
+          for (int i=0; i<NUM_ROW; i++) {
+            for (int j=0; j<NUM_COLUMN; j++) {
+              temp[j] = serialInArray[i*16+j]; //array 1 dimension -> 2 dimension
+              data[i][j] = temp[j];
+            }
+          }
+          myPort.write('A');
+          serialCount = 0;
         }
-
-        // Send a capital A to request new sensor readings:
-        myPort.write('A');
-        // Reset serialCount:
-        serialCount = 0;
       }
     }
   }
