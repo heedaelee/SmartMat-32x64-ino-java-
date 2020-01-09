@@ -10,8 +10,8 @@ ControlP5 cp5;
 PFont font;
 
 // Matirx array constant.
-int NUM_COLUMN = 32;
-int NUM_ROW = 64;
+int NUM_COLUMN = 16;
+int NUM_ROW =16;
 int NUM_SENSOR = NUM_COLUMN * NUM_ROW;
 
 
@@ -67,7 +67,7 @@ String portName;
 String COMlist [] = new String[Serial.list().length];
 
 //dev mode ->false, when testing -> true
-final boolean serialConn = false;
+final boolean serialConn = true;
 
 void settings() {
   // Set size of window : size(width, Height)
@@ -91,7 +91,7 @@ void setup() {
   frameRate(100);
   surface.setResizable(true);
   //colormode rgb -> HSB
-  colorMode(HSB, 360, 100, 100);
+  //colorMode(HSB, 360, 100, 100);
 
   font = createFont("Arial Bold", 48);
   //Create csv first row's column
@@ -130,7 +130,7 @@ void setup() {
 
   // draw Sensitivity slider button  
   cp5.addSlider("multiplyConst").setCaptionLabel("Sensitivity")
-    .setRange(1, 28)
+    .setRange(1, 40)
     .setPosition(minBtnX, minBtnY+20)
     .setSize(minBtnWidth, minBtnHeight);
 
@@ -153,9 +153,13 @@ void setup() {
 
         if (serialConn) println(portName);
         myPort = new Serial(this, portName, 115200); // change baud rate to your liking
+        
         // for restart throw A
+        println("restart");
         myPort.write('A');
-        //myPort.clear();
+        firstContact=true;
+        myPort.clear();
+        
       } else {
         showMessageDialog(frame, "PC에 연결된 포트가 없습니다");
         exit();
@@ -191,7 +195,7 @@ void draw() {
     //Draw rectangular for sensor indication.
     for (int i=0; i<NUM_ROW; i++) {
       for (int j=0; j<NUM_COLUMN; j++) {
-        fill(data[i][j]*14, 0, 0);
+        fill(data[i][j]*multiplyConst, 0, 0);
         rect(sideSpace/2+j*one_recSize_space, upperSpace+i*one_recSize_space, one_recSize, one_recSize, 3);
         //if(i==32&&j==31){text("1", 33+j*one_recSize_space, 68+i*one_recSize_space);}
         //if(i==0&&j==15){text("16", 20+j*one_recSize_space, 65+i*one_recSize_space);}
@@ -201,25 +205,32 @@ void draw() {
   }
 }
 
-int multiplyConst = 14;
+int multiplyConst = 18;
 int loadingTime = 2500;
 
 void serialEvent(Serial myPort) {
   if (serialConn) {
     // read a byte from the serial port:
     int inByte = myPort.read();
+    println("inByte : "+ inByte);
+    println(firstContact);
+    println(serialCount);
     //println("serial ok"+inByte);
     // if this is the first byte received, and it's an A,
     // clear the serial buffer and note that you've
     // had first contact from the microcontroller. 
     // Otherwise, add the incoming byte to the array:
+    
     if (firstContact == false) {
+      
       if (inByte == 'A') { 
+        println("탄다");
         myPort.clear();          // clear the serial port buffer
         firstContact = true;     // you've had first contact from the microcontroller
         myPort.write('A');       // ask for more
       }
     } else {
+      
       // Add the latest byte from the serial port to array:
       // In here, no 'A', because in arduino, if found 'A', send again 'Serial.write(valor);' so i think pure number in data. 
       serialInArray[serialCount] = inByte;
@@ -227,8 +238,10 @@ void serialEvent(Serial myPort) {
 
       // If we have 
       if (serialCount >= 256 ) {
+        println("datawr");
         render = 1; // allow to render !!
 
+        passedTime = millis() - savedTime;
         //if loadingtime, minInterval, then create a row
         if (millis()>loadingTime && passedTime > minInterval) {
           TableRow newRow = table.addRow();  
