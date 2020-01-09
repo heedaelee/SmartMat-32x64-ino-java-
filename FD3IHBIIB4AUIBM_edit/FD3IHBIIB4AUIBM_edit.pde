@@ -87,10 +87,11 @@ void settings() {
 }
 
 void setup() {
-
   // Set frame rate.
   frameRate(100);
   surface.setResizable(true);
+  //colormode rgb -> HSB
+  colorMode(HSB, 360, 100, 100);
 
   font = createFont("Arial Bold", 48);
   //Create csv first row's column
