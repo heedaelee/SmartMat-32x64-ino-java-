@@ -45,6 +45,7 @@ int upperSpace = 80;
 int belowSpace = 20;
 int one_recSize_space = 14;
 float one_recSize = 11.5;
+int radius = 2;
 int firstyLayer1 = 40;
 
 //button
@@ -52,6 +53,8 @@ int sBtnX;
 int sBtnY;
 int rBtnX;
 int rBtnY;
+int reBtnX;
+int reBtnY;
 int sBtnWidth = 60;
 int sBtnHeight = 30;
 int btnSpace = 10;
@@ -61,6 +64,8 @@ int minBtnWidth;
 int minBtnHeight;
 int timeTextX;
 int timeTextY;
+
+boolean changeToHsb = false;
 
 
 String portName;
@@ -78,6 +83,8 @@ void settings() {
   sBtnY = firstyLayer1-10;
   rBtnX = sBtnX+sBtnWidth+btnSpace;
   rBtnY = sBtnY;
+  reBtnX = rBtnX+sBtnWidth+btnSpace;
+  reBtnY = sBtnY;
   minBtnX = rBtnX+sBtnWidth+width/8;
   minBtnY = sBtnY;
   minBtnWidth = sBtnWidth*2/3;
@@ -91,7 +98,7 @@ void setup() {
   frameRate(100);
   surface.setResizable(true);
   //colormode rgb -> HSB
-  //colorMode(HSB, 360, 100, 100);
+  if (changeToHsb) colorMode(HSB, 360, 100, 100);
 
   font = createFont("Arial Bold", 48);
   //Create csv first row's column
@@ -119,6 +126,11 @@ void setup() {
   // draw reset button
   Button resetBtn= cp5.addButton("RESET")
     .setPosition(rBtnX, rBtnY)
+    .setSize(sBtnWidth, sBtnHeight);
+  resetBtn.getCaptionLabel().setFont(font).setSize(13);
+
+  Button restartBtn= cp5.addButton("RESTART")
+    .setPosition(reBtnX, reBtnY)
     .setSize(sBtnWidth, sBtnHeight);
   resetBtn.getCaptionLabel().setFont(font).setSize(13);
 
@@ -153,13 +165,6 @@ void setup() {
 
         if (serialConn) println(portName);
         myPort = new Serial(this, portName, 115200); // change baud rate to your liking
-        
-        // for restart throw A
-        println("restart");
-        myPort.write('A');
-        firstContact=true;
-        myPort.clear();
-        
       } else {
         showMessageDialog(frame, "PC에 연결된 포트가 없습니다");
         exit();
@@ -195,8 +200,10 @@ void draw() {
     //Draw rectangular for sensor indication.
     for (int i=0; i<NUM_ROW; i++) {
       for (int j=0; j<NUM_COLUMN; j++) {
-        fill(data[i][j]*multiplyConst, 0, 0);
-        rect(sideSpace/2+j*one_recSize_space, upperSpace+i*one_recSize_space, one_recSize, one_recSize, 3);
+        if (changeToHsb)fill(0, data[i][j]*multiplyConst, 100);//HSB
+        else fill(data[i][j]*multiplyConst, 0, 0); //RGB color mode
+
+        rect(sideSpace/2+j*one_recSize_space, upperSpace+i*one_recSize_space, one_recSize, one_recSize, radius);
         //if(i==32&&j==31){text("1", 33+j*one_recSize_space, 68+i*one_recSize_space);}
         //if(i==0&&j==15){text("16", 20+j*one_recSize_space, 65+i*one_recSize_space);}
       }
@@ -205,7 +212,7 @@ void draw() {
   }
 }
 
-int multiplyConst = 18;
+int multiplyConst = 20;
 int loadingTime = 2500;
 
 void serialEvent(Serial myPort) {
@@ -220,9 +227,9 @@ void serialEvent(Serial myPort) {
     // clear the serial buffer and note that you've
     // had first contact from the microcontroller. 
     // Otherwise, add the incoming byte to the array:
-    
+
     if (firstContact == false) {
-      
+
       if (inByte == 'A') { 
         println("탄다");
         myPort.clear();          // clear the serial port buffer
@@ -230,7 +237,7 @@ void serialEvent(Serial myPort) {
         myPort.write('A');       // ask for more
       }
     } else {
-      
+
       // Add the latest byte from the serial port to array:
       // In here, no 'A', because in arduino, if found 'A', send again 'Serial.write(valor);' so i think pure number in data. 
       serialInArray[serialCount] = inByte;
@@ -290,6 +297,20 @@ public void RESET() {
   showMessageDialog(null, "데이터 로우를 초기화합니다", "메시지", INFORMATION_MESSAGE);
   table.clearRows();
 }
+
+public void RESTART() {
+  println("restart");
+  table.clearRows();
+  // for restart throw A
+  println("restart");
+  println(serialCount);
+  myPort.clear();
+  println(firstContact);
+  firstContact=true;
+  myPort.write('A');
+}
+
+
 
 // Set escape event for terminate program.
 void keyPressed() {

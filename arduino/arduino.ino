@@ -144,6 +144,7 @@ void loop(){
 //      Serial.print("start & initMaximum : ");
 //      Serial.print(initMaximum);
 //      Serial.println();
+      
       for(int j = 15; j >= 0; j--){ //왜 15부터?? -> 기존 개발자가 역순으로 순서를 바꿈
         writeMux(j);
         
