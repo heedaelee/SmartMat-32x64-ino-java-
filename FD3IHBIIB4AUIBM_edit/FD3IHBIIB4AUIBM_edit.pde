@@ -200,10 +200,12 @@ void draw() {
     //Draw rectangular for sensor indication.
     for (int i=0; i<NUM_ROW; i++) {
       for (int j=0; j<NUM_COLUMN; j++) {
+
         if (changeToHsb)fill(0, data[i][j]*multiplyConst, 100);//HSB
         else fill(data[i][j]*multiplyConst, 0, 0); //RGB color mode
 
         rect(sideSpace/2+j*one_recSize_space, upperSpace+i*one_recSize_space, one_recSize, one_recSize, radius);
+
         //if(i==32&&j==31){text("1", 33+j*one_recSize_space, 68+i*one_recSize_space);}
         //if(i==0&&j==15){text("16", 20+j*one_recSize_space, 65+i*one_recSize_space);}
       }
