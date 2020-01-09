@@ -66,6 +66,7 @@ int timeTextY;
 String portName;
 String COMlist [] = new String[Serial.list().length];
 
+//dev mode ->false, when testing -> true
 final boolean serialConn = false;
 
 void settings() {
@@ -83,13 +84,13 @@ void settings() {
   minBtnHeight = sBtnHeight*1/2;
   timeTextX = minBtnX;
   timeTextY = height/40;
-  
 }
 
 void setup() {
 
   // Set frame rate.
   frameRate(100);
+  surface.setResizable(true);
 
   font = createFont("Arial Bold", 48);
   //Create csv first row's column
@@ -177,7 +178,7 @@ void draw() {
     textFont(font, 11);
     fill(255);
     getDate();
-    text(str(y)+"."+str(m)+"."+str(d)+". "+str(h)+":"+str(mn)+":"+str(s), timeTextX,timeTextY);
+    text(str(y)+"."+str(m)+"."+str(d)+". "+str(h)+":"+str(mn)+":"+str(s), timeTextX, timeTextY);
 
     // Set font size and color.
     textFont(font, 10);
