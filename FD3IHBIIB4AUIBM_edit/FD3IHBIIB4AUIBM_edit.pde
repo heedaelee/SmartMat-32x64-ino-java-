@@ -6,92 +6,11 @@ import java.util.Date;
 import controlP5.*;
 import static javax.swing.JOptionPane.*;
 
-ControlP5 cp5;
-PFont font;
+//switch
+boolean changeToHsb = true;
+boolean serialConn = false; //dev mode ->false, when testing -> true
 
-// Matirx array constant.
-int NUM_COLUMN = 16;
-int NUM_ROW =16;
-int NUM_SENSOR = NUM_COLUMN * NUM_ROW;
-
-
-Serial myPort;               // The serial port
-int[] serialInArray = new int[256];    // Where we'll put what we receive
-int[][] data = new int[NUM_ROW][NUM_COLUMN];
-int[] temp = new int[16];
-
-Table table;
-
-//Set-up interval saving time
-int savedTime;
-int minInterval = 500; //1s = 1000
-int passedTime;
-
-int serialCount = 0;                 // A count of how many bytes we receive
-boolean firstContact = false;        // Whether we've heard from the microcontroller
-int render=0;
-
-// Variables for current date & time.
-int d;    // Values from 1 - 31
-int m;  // Values from 1 - 12
-int y;   // 2003, 2004, 2005, etc.
-int s;  // Values from 0 - 59
-int mn;  // Values from 0 - 59
-int h;    // Values from 0 - 23
-
-//layout
-int sideSpace = 80;
-int upperSpace = 80;
-int belowSpace = 20;
-int one_recSize_space = 14;
-float one_recSize = 11.5;
-int radius = 2;
-int firstyLayer1 = 40;
-
-//button
-int sBtnX;
-int sBtnY;
-int rBtnX;
-int rBtnY;
-int reBtnX;
-int reBtnY;
-int sBtnWidth = 60;
-int sBtnHeight = 30;
-int btnSpace = 10;
-int minBtnX;
-int minBtnY;
-int minBtnWidth;
-int minBtnHeight;
-int timeTextX;
-int timeTextY;
-
-boolean changeToHsb = false;
-
-
-String portName;
-String COMlist [] = new String[Serial.list().length];
-
-//dev mode ->false, when testing -> true
-final boolean serialConn = true;
-
-void settings() {
-  // Set size of window : size(width, Height)
-  size(sideSpace + one_recSize_space * NUM_COLUMN, upperSpace + belowSpace + one_recSize_space * NUM_ROW);
-
-  //button location assignment
-  sBtnX = sideSpace/2 + (one_recSize_space * NUM_COLUMN-(sBtnWidth*2+10))/2;
-  sBtnY = firstyLayer1-10;
-  rBtnX = sBtnX+sBtnWidth+btnSpace;
-  rBtnY = sBtnY;
-  reBtnX = rBtnX+sBtnWidth+btnSpace;
-  reBtnY = sBtnY;
-  minBtnX = rBtnX+sBtnWidth+width/8;
-  minBtnY = sBtnY;
-  minBtnWidth = sBtnWidth*2/3;
-  minBtnHeight = sBtnHeight*1/2;
-  timeTextX = minBtnX;
-  timeTextY = height/40;
-}
+//To tab frontGUI..
 
 void setup() {
   // Set frame rate.
@@ -117,34 +36,8 @@ void setup() {
   // create a new button 
   cp5 = new ControlP5(this);
 
-  // draw save button
-  Button saveBtn= cp5.addButton("SAVE")
-    .setPosition(sBtnX, sBtnY)
-    .setSize(sBtnWidth, sBtnHeight);
-  saveBtn.getCaptionLabel().setFont(font).setSize(13);
-
-  // draw reset button
-  Button resetBtn= cp5.addButton("RESET")
-    .setPosition(rBtnX, rBtnY)
-    .setSize(sBtnWidth, sBtnHeight);
-  resetBtn.getCaptionLabel().setFont(font).setSize(13);
-
-  Button restartBtn= cp5.addButton("RESTART")
-    .setPosition(reBtnX, reBtnY)
-    .setSize(sBtnWidth, sBtnHeight);
-  resetBtn.getCaptionLabel().setFont(font).setSize(13);
-
-  // draw minInterval slider button
-  cp5.addSlider("minInterval").setCaptionLabel("Min_Interval")
-    .setRange(100, 1000)
-    .setPosition(minBtnX, minBtnY)
-    .setSize(minBtnWidth, minBtnHeight);
-
-  // draw Sensitivity slider button  
-  cp5.addSlider("multiplyConst").setCaptionLabel("Sensitivity")
-    .setRange(1, 40)
-    .setPosition(minBtnX, minBtnY+20)
-    .setSize(minBtnWidth, minBtnHeight);
+  // above, all button method
+  button();
 
   // Select serial port.
   if (serialConn) {
@@ -201,10 +94,15 @@ void draw() {
     for (int i=0; i<NUM_ROW; i++) {
       for (int j=0; j<NUM_COLUMN; j++) {
 
-        if (changeToHsb)fill(0, data[i][j]*multiplyConst, 100);//HSB
+        //dump data
+        //data[i][j]=j;
+
+        //if (changeToHsb) fill(0, data[i][j]*multiplyConst, 100);//HSB white ->red
+        if (changeToHsb) fill(240-data[i][j]*multiplyConst, 100, 100);//HSB blue -> red
         else fill(data[i][j]*multiplyConst, 0, 0); //RGB color mode
 
         rect(sideSpace/2+j*one_recSize_space, upperSpace+i*one_recSize_space, one_recSize, one_recSize, radius);
+        text(data[i][j]*multiplyConst, sideSpace/2+j*one_recSize_space, upperSpace+i*one_recSize_space);
 
         //if(i==32&&j==31){text("1", 33+j*one_recSize_space, 68+i*one_recSize_space);}
         //if(i==0&&j==15){text("16", 20+j*one_recSize_space, 65+i*one_recSize_space);}
@@ -214,8 +112,7 @@ void draw() {
   }
 }
 
-int multiplyConst = 20;
-int loadingTime = 2500;
+
 
 void serialEvent(Serial myPort) {
   if (serialConn) {
@@ -283,61 +180,4 @@ void serialEvent(Serial myPort) {
   }
 }
 
-//SAVE button click event
-public void SAVE() {
-  println("data saved");
-  getDate();
-  saveTable(table, "data/"+str(y)+"_"+str(m)+"_"+str(d)+"_"+str(h)+"_"+str(mn)+"_"+str(s)+".csv");
-  String dataPath = dataPath(""); 
-  showMessageDialog(null, "저장되었습니다"+"\n 저장경로: "+dataPath, "메시지", INFORMATION_MESSAGE);
-  table.clearRows();
-}
-
-//RESET button click event
-public void RESET() {
-  println("data reset");
-  showMessageDialog(null, "데이터 로우를 초기화합니다", "메시지", INFORMATION_MESSAGE);
-  table.clearRows();
-}
-
-public void RESTART() {
-  println("restart");
-  table.clearRows();
-  // for restart throw A
-  println("restart");
-  println(serialCount);
-  myPort.clear();
-  println(firstContact);
-  firstContact=true;
-  myPort.write('A');
-}
-
-
-
-// Set escape event for terminate program.
-void keyPressed() {
-  if (key == 27) { // 27 means ESC key
-    getDate();
-    saveTable(table, "data/"+str(y)+"_"+str(m)+"_"+str(d)+"_"+str(h)+"_"+str(mn)+"_"+str(s)+".csv");
-    //myPort.dispose();
-    exit(); // Stops the program
-  }
-}
-
-// Get current date and hours.
-void getDate() {
-  d = day();    // Values from 1 - 31
-  m = month();  // Values from 1 - 12
-  y = year();   // 2003, 2004, 2005, etc.
-  s = second();  // Values from 0 - 59
-  mn = minute();  // Values from 0 - 59
-  h = hour();    // Values from 0 - 23
-}
-
-//first column in csv file.
-String timeStamp(int MS) {
-  float seconds = float(nfs((MS % 60000)/1000f, 2, 2));
-  int minutes = (MS / (1000*60)) % 60;
-  int hours = ((MS/(1000*60*60)) % 24);                      
-  return hours+": " +minutes+ ": "+ seconds;
-}
+//To tab frontValue..
