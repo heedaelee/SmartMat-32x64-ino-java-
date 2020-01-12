@@ -95,17 +95,23 @@ void draw() {
       for (int j=0; j<NUM_COLUMN; j++) {
 
         //dump data
-        //data[i][j]=j;
+        if(!serialConn) data[i][j]=j;
 
         //if (changeToHsb) fill(0, data[i][j]*multiplyConst, 100);//HSB white ->red
-        if (changeToHsb) fill(240-data[i][j]*multiplyConst, 100, 100);//HSB blue -> red
+        if (changeToHsb) fill(240-data[i][j]*multiplyConst, 100, 100);//HSB  adjust Hue, ref) blue (240) -> red (0)
         else fill(data[i][j]*multiplyConst, 0, 0); //RGB color mode
 
-        rect(sideSpace/2+j*one_recSize_space, upperSpace+i*one_recSize_space, one_recSize, one_recSize, radius);
-        text(data[i][j]*multiplyConst, sideSpace/2+j*one_recSize_space, upperSpace+i*one_recSize_space);
+        noStroke();
+        //origin
+        //rect(sideSpace/2+j*recSize_space, upperSpace+i*recSize_space, recSize, recSize, radius);
+        //->[test]no white space
+        rect(sideSpace/2+j*recSize_space, upperSpace+i*recSize_space, recSize, recSize, radius);
 
-        //if(i==32&&j==31){text("1", 33+j*one_recSize_space, 68+i*one_recSize_space);}
-        //if(i==0&&j==15){text("16", 20+j*one_recSize_space, 65+i*one_recSize_space);}
+        //show the each value for test
+        //text(data[i][j]*multiplyConst, sideSpace/2+j*recSize_space, upperSpace+i*recSize_space);
+        //1,16 row ... divide sign for test
+        //if(i==32&&j==31){text("1", 33+j*recSize_space, 68+i*recSize_space);}
+        //if(i==0&&j==15){text("16", 20+j*recSize_space, 65+i*recSize_space);}
       }
     }
     render=0;

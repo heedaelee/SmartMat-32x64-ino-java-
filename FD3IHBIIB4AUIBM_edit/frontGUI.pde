@@ -35,9 +35,9 @@ int h;    // Values from 0 - 23
 int sideSpace = 80;
 int upperSpace = 80;
 int belowSpace = 20;
-int one_recSize_space = 14;
-float one_recSize = 11.5;
-int radius = 2;
+int recSize_space = 13;
+float recSize = 12.9;
+int radius = 0;
 int firstyLayer1 = 40;
 
 //button
@@ -57,23 +57,18 @@ int minBtnHeight;
 int timeTextX;
 int timeTextY;
 
-
-
 String portName;
 String COMlist [] = new String[Serial.list().length];
-
-
 
 int multiplyConst = 20;
 int loadingTime = 2500;
 
-
 void settings() {
   // Set size of window : size(width, Height)
-  size(sideSpace + one_recSize_space * NUM_COLUMN, upperSpace + belowSpace + one_recSize_space * NUM_ROW);
+  size(sideSpace + recSize_space * NUM_COLUMN, upperSpace + belowSpace + recSize_space * NUM_ROW);
 
   //button location assignment
-  sBtnX = sideSpace/2 + (one_recSize_space * NUM_COLUMN-(sBtnWidth*3+10))/2;
+  sBtnX = sideSpace/2 + (recSize_space * NUM_COLUMN-(sBtnWidth*3+10))/2;
   sBtnY = firstyLayer1-10;
   rBtnX = sBtnX+sBtnWidth+btnSpace;
   rBtnY = sBtnY;
