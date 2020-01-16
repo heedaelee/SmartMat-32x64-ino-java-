@@ -95,7 +95,7 @@ void button() {
     .setSize(sBtnWidth, sBtnHeight);
   resetBtn.getCaptionLabel().setFont(font).setSize(13);
 
-  Button restartBtn= cp5.addButton("RESTART")
+  Button connectBtn= cp5.addButton("CONNECT")
     .setPosition(reBtnX, reBtnY)
     .setSize(sBtnWidth, sBtnHeight);
   resetBtn.getCaptionLabel().setFont(font).setSize(13);

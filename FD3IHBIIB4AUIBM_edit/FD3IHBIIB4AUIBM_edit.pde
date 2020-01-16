@@ -128,21 +128,6 @@ void serialEvent(Serial myPort) {
     println("inByte : "+ inByte);
     println(firstContact);
     println(serialCount);
-    //println("serial ok"+inByte);
-    // if this is the first byte received, and it's an A,
-    // clear the serial buffer and note that you've
-    // had first contact from the microcontroller. 
-    // Otherwise, add the incoming byte to the array:
-
-    if (firstContact == false) {
-
-      if (inByte == 'A') { 
-        println("탄다");
-        myPort.clear();          // clear the serial port buffer
-        firstContact = true;     // you've had first contact from the microcontroller
-        myPort.write('A');       // ask for more
-      }
-    } else {
 
       // Add the latest byte from the serial port to array:
       // In here, no 'A', because in arduino, if found 'A', send again 'Serial.write(valor);' so i think pure number in data. 
@@ -183,7 +168,7 @@ void serialEvent(Serial myPort) {
           serialCount = 0;
         }
       }
-    }
+    
   }
 }
 

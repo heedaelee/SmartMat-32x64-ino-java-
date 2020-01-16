@@ -16,15 +16,13 @@ public void RESET() {
   table.clearRows();
 }
 
-public void RESTART() {
-  println("restart");
+public void CONNECT() {
+  println("connect");
   table.clearRows();
-  // for restart throw A
+  // for connecting throw A
   println("restart");
   println(serialCount);
   myPort.clear();
-  println(firstContact);
-  firstContact=true;
   myPort.write('A');
 }
 
