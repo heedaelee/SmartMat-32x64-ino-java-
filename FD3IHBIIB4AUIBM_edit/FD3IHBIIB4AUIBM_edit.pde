@@ -8,9 +8,10 @@ import static javax.swing.JOptionPane.*;
 
 //switch
 boolean changeToHsb = true;
-boolean serialConn = false; //dev mode ->false, when testing -> true
+boolean serialConn = true; //dev mode ->false, when testing -> true
 
 //To tab frontGUI..
+
 
 void setup() {
   // Set frame rate.
@@ -97,8 +98,8 @@ void draw() {
         //dump data
         if(!serialConn) data[i][j]=j;
 
-        //if (changeToHsb) fill(0, data[i][j]*multiplyConst, 100);//HSB white ->red
-        if (changeToHsb) fill(240-data[i][j]*multiplyConst, 100, 100);//HSB  adjust Hue, ref) blue (240) -> red (0)
+        if (changeToHsb) fill(0, data[i][j]*multiplyConst, 100);//HSB white ->red
+        //if (changeToHsb) fill(240-data[i][j]*multiplyConst, 100, 100);//HSB  adjust Hue, ref) blue (240) -> red (0)
         else fill(data[i][j]*multiplyConst, 0, 0); //RGB color mode
 
         noStroke();

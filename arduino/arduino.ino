@@ -185,7 +185,6 @@ int readMux(byte channel){
   for(int i = 0; i < 4; i ++){
     digitalWrite(controlPin[i], muxChannel[channel][i]);
   }
-
   //read the value at the SIG pin
   
   int val = analogRead(SIG_pin);

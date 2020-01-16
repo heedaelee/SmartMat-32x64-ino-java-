@@ -2,8 +2,8 @@ ControlP5 cp5;
 PFont font;
 
 // Matirx array constant.
-int NUM_COLUMN = 32;
-int NUM_ROW =64;
+int NUM_COLUMN = 16;
+int NUM_ROW =16;
 int NUM_SENSOR = NUM_COLUMN * NUM_ROW;
 
 
@@ -60,7 +60,7 @@ int timeTextY;
 String portName;
 String COMlist [] = new String[Serial.list().length];
 
-int multiplyConst = 20;
+int multiplyConst = 10;
 int loadingTime = 2500;
 
 void settings() {
