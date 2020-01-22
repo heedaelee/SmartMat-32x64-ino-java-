@@ -95,8 +95,8 @@ void draw() {
     for (int i=0; i<NUM_ROW; i++) {
       for (int j=0; j<NUM_COLUMN; j++) {
 
-        //dump data 가나달
-        if(!serialConn) data[i][j]=j;
+        //dump data 
+        if (!serialConn) data[i][j]=j;
 
         if (changeToHsb) fill(0, data[i][j]*multiplyConst, 100);//HSB white ->red
         //if (changeToHsb) fill(240-data[i][j]*multiplyConst, 100, 100);//HSB  adjust Hue, ref) blue (240) -> red (0)
@@ -107,78 +107,66 @@ void draw() {
         //rect(sideSpace/2+j*recSize_space, upperSpace+i*recSize_space, recSize, recSize, radius);
         //->[test]no white space
         rect(sideSpace/2+j*recSize_space, upperSpace+i*recSize_space, recSize, recSize, radius);
-
-        //show the each value for test
-        //text(data[i][j]*multiplyConst, sideSpace/2+j*recSize_space, upperSpace+i*recSize_space);
-        //1,16 row ... divide sign for test
-        //if(i==32&&j==31){text("1", 33+j*recSize_space, 68+i*recSize_space);}
-        //if(i==0&&j==15){text("16", 20+j*recSize_space, 65+i*recSize_space);}
       }
     }
     render=0;
   }
 }
 
-
-
 void serialEvent(Serial myPort) {
   if (serialConn) {
-    
+
     // read a byte from the serial port:
     println("test");
     int inByte = myPort.read();
     //println("inByte : "+ inByte);
     //println(firstContact);
     println(serialCount);
-      // Add the latest byte from the serial port to array:
-      // In here, no 'A', because in arduino, if found 'A', send again 'Serial.write(valor);' so i think pure number in data. 
-      serialInArray[serialCount] = inByte;
-      
-      serialCount++;
+    // Add the latest byte from the serial port to array:
+    // In here, no 'A', because in arduino, if found 'A', send again 'Serial.write(valor);' so i think pure number in data. 
+    serialInArray[serialCount] = inByte;
 
-      // If we have 
-      if (serialCount >= 256 ) {
-        println("datawr");
-        render = 1; // allow to render !!
+    serialCount++;
 
-        passedTime = millis() - savedTime;
-        //if loadingtime, minInterval, then create a row
-        if (millis()>loadingTime && passedTime > minInterval) {
-          TableRow newRow = table.addRow();  
-          newRow.setString("TimeStamp", timeStamp(millis()));
-          for (int i=0; i<NUM_ROW; i++) {
-            for (int j=0; j<NUM_COLUMN; j++) {
-              temp[j] = serialInArray[i*16+j]; //array 1 dimension -> 2 dimension
-              data[i][j] = temp[j];
-              String columnName = "(" + i + "," + j + ")";
-              newRow.setInt(columnName, data[i][j]);
-            }
+    // If we have 
+    if (serialCount >= 256 ) {
+      println("datawr");
+      render = 1; // allow to render !!
+
+      passedTime = millis() - savedTime;
+      //if >loadingtime, >minInterval, then create a row
+      if (millis()>loadingTime && passedTime > minInterval) {
+        TableRow newRow = table.addRow();  
+        newRow.setString("TimeStamp", timeStamp(millis()));
+        for (int i=0; i<NUM_ROW; i++) {
+          for (int j=0; j<NUM_COLUMN; j++) {
+            temp[j] = serialInArray[i*16+j]; //array 1 dimension -> 2 dimension, how? : each row put in temp[], and put temp[] in data[][]
+            data[i][j] = temp[j];
+            String columnName = "(" + i + "," + j + ")";
+            newRow.setInt(columnName, data[i][j]);
           }
-          savedTime = millis();
-          // Send a capital A to request new sensor readings:
-          myPort.write('A');
-          // Reset serialCount:
-          serialCount = 0;
-        } else { //just draw, not write
-          for (int i=0; i<NUM_ROW; i++) {
-            for (int j=0; j<NUM_COLUMN; j++) {
-              temp[j] = serialInArray[i*16+j]; //array 1 dimension -> 2 dimension
-              data[i][j] = temp[j];
-            }
-          }
-          myPort.write('A');
-          serialCount = 0;
         }
+        savedTime = millis();
+        myPort.write('A');// Send a capital A to request new sensor readings:
+        serialCount = 0;// Reset serialCount:
+      } else { //just draw, not write
+        for (int i=0; i<NUM_ROW; i++) {
+          for (int j=0; j<NUM_COLUMN; j++) {
+            temp[j] = serialInArray[i*16+j]; 
+            data[i][j] = temp[j];
+          }
+        }
+        myPort.write('A');
+        serialCount = 0;
       }
-    
+    }
   }
 }
 
-void exit(){
-//  println("stop");//do your thing on exit here
-super.exit();//let pro-cessing carry with it's regular exit routine
-//  //myPort.write('E');
-
+void exit() {
+  //  println("stop");//do your thing on exit here
+  super.exit();//let pro-cessing carry with it's regular exit routine
+  //  //myPort.write('E');
 }
 
 

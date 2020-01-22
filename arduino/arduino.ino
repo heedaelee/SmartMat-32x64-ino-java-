@@ -1,23 +1,19 @@
-//Mux control pins for analog signal (SIG_pin) default for arduino mini pro
-//디지털 입출력 핀 //칼럼
+//Mux 디지털 입출력 핀_칼럼
 const byte s0 = 10;
 const byte s1 = 16;
 const byte s2 = 14;
 const byte s3 = 15;
 
-//Mux control pins for Output signal (OUT_pin) default for arduino mini pro
-//디지털 입출력 핀 //로우
+//Mux 디지털 입출력 핀_로우
 const byte w0 = 9; 
 const byte w1 = 8; 
 const byte w2 = 7;
 const byte w3 = 6;                                                                           
      
-//Mux in "SIG" pin default for arduino mini pro 
 //col 아날로그 데이터 입력핀 mc : 0번핀(A0)
 const byte SIG_pin = A0; 
 
-//Mux out "SIG" pin default for arduino mini pro
-//row 아날로그 데이터 입력핀 mc : 4번핀(A6)
+//row 아날로그 데이터 입력핀,  mc : A3
 const byte OUT_pin = A3;
 
 //Row and Column pins default for arduino mini pro
@@ -96,8 +92,6 @@ void setup(){
     writeMux(j);
     for(byte i = 0; i < 16; i++){
       calibra[j][i] = 0; //초기값 0 주입
-//      Serial.println("cali 확인"); 
-//      Serial.print(calibra[j][i]);
       }
   }
   
@@ -127,7 +121,6 @@ void setup(){
   Serial.print("initMaximum Value: ");
   Serial.println(initMaximum); //초기 최대값
   Serial.println();
-  
   establishContact();// send a byte to establish contact until receiver responds
  
   digitalWrite(COL_pin, LOW);
@@ -139,23 +132,12 @@ void loop(){
   //Reports back Value at channel 6 is: 346
   if (Serial.available() > 0){
     inByte = Serial.read();//처음 start letter
-//    if(inByte == 'E'){
-//      while(Serial.read()>=0);
-//      
-//      }
+
     if(inByte == 'A'){
-      
-//      Serial.print("start & initMaximum : ");
-//      Serial.print(initMaximum);
-//      Serial.println();
-      
       for(int j = 15; j >= 0; j--){ //왜 15부터?? -> 기존 개발자가 역순으로 순서를 바꿈
         writeMux(j);
-        
         for(int i = 0; i < 16; i++){// 15 -> 16  수정 1/3
           valor = readMux(i); //int
-//          Serial.print(valor);
-//          Serial.print(" ");
           //Saturation sensors, 최대값 조절
           int maximum = 1024;
 
@@ -168,19 +150,16 @@ void loop(){
             valor = 100;
           
           Serial.write(valor);
-//        시리얼프린터 출력
+//        시리얼모니터 출력
 //          Serial.print(valor);
 //          Serial.print(" ");
-          
           digitalWrite(COL_pin,!digitalRead(COL_pin)); //column pin 반전,LOW->HIGH
         }
 //          Serial.println(); 
       }
     }
-        
   }
 }
-
 
 int readMux(byte channel){
   byte controlPin[] = {s0, s1, s2, s3};
@@ -193,7 +172,7 @@ int readMux(byte channel){
   
   int val = analogRead(SIG_pin);
 //    Serial.println(val);
-  //return the value
+//    return the value
   return val;
 }
 
