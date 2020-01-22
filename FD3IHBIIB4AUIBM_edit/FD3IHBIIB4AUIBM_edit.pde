@@ -95,7 +95,7 @@ void draw() {
     for (int i=0; i<NUM_ROW; i++) {
       for (int j=0; j<NUM_COLUMN; j++) {
 
-        //dump data
+        //dump data 가나달
         if(!serialConn) data[i][j]=j;
 
         if (changeToHsb) fill(0, data[i][j]*multiplyConst, 100);//HSB white ->red
@@ -123,15 +123,17 @@ void draw() {
 
 void serialEvent(Serial myPort) {
   if (serialConn) {
+    
     // read a byte from the serial port:
+    println("test");
     int inByte = myPort.read();
-    println("inByte : "+ inByte);
-    println(firstContact);
+    //println("inByte : "+ inByte);
+    //println(firstContact);
     println(serialCount);
-
       // Add the latest byte from the serial port to array:
       // In here, no 'A', because in arduino, if found 'A', send again 'Serial.write(valor);' so i think pure number in data. 
       serialInArray[serialCount] = inByte;
+      
       serialCount++;
 
       // If we have 
@@ -171,5 +173,13 @@ void serialEvent(Serial myPort) {
     
   }
 }
+
+void exit(){
+//  println("stop");//do your thing on exit here
+super.exit();//let pro-cessing carry with it's regular exit routine
+//  //myPort.write('E');
+
+}
+
 
 //To tab frontValue..

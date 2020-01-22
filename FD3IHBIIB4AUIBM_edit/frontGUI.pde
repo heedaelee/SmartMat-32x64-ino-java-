@@ -76,7 +76,7 @@ void settings() {
   reBtnY = sBtnY;
   minBtnX =reBtnX+sBtnWidth+btnSpace+width/12;
   minBtnY = sBtnY;
-  minBtnWidth = sBtnWidth*2/3;
+  minBtnWidth = sBtnWidth*3/4;
   minBtnHeight = sBtnHeight*1/2;
   timeTextX = minBtnX;
   timeTextY = height/40;

@@ -24,6 +24,7 @@ public void CONNECT() {
   println(serialCount);
   myPort.clear();
   myPort.write('A');
+  serialCount = 0;
 }
 
 

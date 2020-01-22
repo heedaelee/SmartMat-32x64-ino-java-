@@ -139,8 +139,12 @@ void loop(){
   //Reports back Value at channel 6 is: 346
   if (Serial.available() > 0){
     inByte = Serial.read();//처음 start letter
-    
+//    if(inByte == 'E'){
+//      while(Serial.read()>=0);
+//      
+//      }
     if(inByte == 'A'){
+      
 //      Serial.print("start & initMaximum : ");
 //      Serial.print(initMaximum);
 //      Serial.println();
