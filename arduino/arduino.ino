@@ -121,8 +121,8 @@ void setup(){
   Serial.print("initMaximum Value: ");
   Serial.println(initMaximum); //초기 최대값
   Serial.println();
-  establishContact();// send a byte to establish contact until receiver responds
- 
+//  establishContact();// send a byte to establish contact until receiver responds 일단 안씀
+  
   digitalWrite(COL_pin, LOW);
 }
 
@@ -132,7 +132,10 @@ void loop(){
   //Reports back Value at channel 6 is: 346
   if (Serial.available() > 0){
     inByte = Serial.read();//처음 start letter
-
+    if(inByte == 'C'){
+      Serial.write('A');   // send a capital A
+      delay(300);
+      }
     if(inByte == 'A'){
       for(int j = 15; j >= 0; j--){ //왜 15부터?? -> 기존 개발자가 역순으로 순서를 바꿈
         writeMux(j);
@@ -185,9 +188,9 @@ void writeMux(byte channel){//ch 0~14 for loop, mat row
   }              //pin 9,8,7,6     [] 0,1,2,3
 }
 
-void establishContact() {
-  while (Serial.available() <= 0) {
-    Serial.write('A');   // send a capital A
-    delay(300);
-  }
-}
+//void establishContact() {
+//  while (Serial.available() <= 0) {
+//    Serial.write('A');   // send a capital A
+//    delay(300);
+//  }
+//}

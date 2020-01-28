@@ -1,7 +1,7 @@
 // i'm edtting  1. changing from 3D to 2D using 32x32 source, 2. add dump,
 
 import processing.serial.*;
-import processing.opengl.*;
+//import processing.opengl.*;
 import java.util.Date;
 import controlP5.*;
 import static javax.swing.JOptionPane.*;
@@ -14,7 +14,6 @@ boolean serialConn = true; //dev mode ->false, when testing -> true
 
 
 void setup() {
-  // Set frame rate.
   frameRate(100);
   surface.setResizable(true);
   //colormode rgb -> HSB
@@ -87,7 +86,6 @@ void draw() {
     // Set font size and color.
     textFont(font, 10);
     fill(255);
-    //text(progVer, width-70, height-15);
     text("FPS :"+int(frameRate), 20, 60);
     text("Connected port: " + portName, 20, 40);
 
@@ -113,58 +111,66 @@ void draw() {
   }
 }
 
+boolean getDate = false;
+
 void serialEvent(Serial myPort) {
   if (serialConn) {
 
     // read a byte from the serial port:
-    println("test");
     int inByte = myPort.read();
     //println("inByte : "+ inByte);
     //println(firstContact);
-    println(serialCount);
-    // Add the latest byte from the serial port to array:
-    // In here, no 'A', because in arduino, if found 'A', send again 'Serial.write(valor);' so i think pure number in data. 
-    serialInArray[serialCount] = inByte;
 
-    serialCount++;
-
-    // If we have 
-    if (serialCount >= 256 ) {
-      println("datawr");
-      render = 1; // allow to render !!
-
-      passedTime = millis() - savedTime;
-      //if >loadingtime, >minInterval, then create a row
-      if (millis()>loadingTime && passedTime > minInterval) {
-        TableRow newRow = table.addRow();  
-        newRow.setString("TimeStamp", timeStamp(millis()));
-        for (int i=0; i<NUM_ROW; i++) {
-          for (int j=0; j<NUM_COLUMN; j++) {
-            temp[j] = serialInArray[i*16+j]; //array 1 dimension -> 2 dimension, how? : each row put in temp[], and put temp[] in data[][]
-            data[i][j] = temp[j];
-            String columnName = "(" + i + "," + j + ")";
-            newRow.setInt(columnName, data[i][j]);
-          }
-        }
-        savedTime = millis();
-        myPort.write('A');// Send a capital A to request new sensor readings:
-        serialCount = 0;// Reset serialCount:
-      } else { //just draw, not write
-        for (int i=0; i<NUM_ROW; i++) {
-          for (int j=0; j<NUM_COLUMN; j++) {
-            temp[j] = serialInArray[i*16+j]; 
-            data[i][j] = temp[j];
-          }
-        }
+    if (getDate == false) {
+      if (inByte == 'A') {
+        myPort.clear();          // clear the serial port buffer
+        getDate = true;     
         myPort.write('A');
-        serialCount = 0;
       }
+    } else {
+      println(serialCount);
+      serialInArray[serialCount] = inByte;
+
+      serialCount++;
+
+      // If we have 
+      if (serialCount >= 256 ) {
+        println("datawr");
+        render = 1; // allow to render !!
+
+        passedTime = millis() - savedTime;
+        //if >loadingtime, >minInterval, then create a row
+        if (millis()>loadingTime && passedTime > minInterval) {
+          TableRow newRow = table.addRow();  
+          newRow.setString("TimeStamp", timeStamp(millis()));
+          for (int i=0; i<NUM_ROW; i++) {
+            for (int j=0; j<NUM_COLUMN; j++) {
+              temp[j] = serialInArray[i*16+j]; //array 1 dimension -> 2 dimension, how? : each row put in temp[], and put temp[] in data[][]
+              data[i][j] = temp[j];
+              String columnName = "(" + i + "," + j + ")";
+              newRow.setInt(columnName, data[i][j]);
+            }
+          }
+          savedTime = millis();
+          myPort.write('A');// Send a capital A to request new sensor readings:
+          serialCount = 0;// Reset serialCount:
+        } else { //just draw, not write in file
+          for (int i=0; i<NUM_ROW; i++) {
+            for (int j=0; j<NUM_COLUMN; j++) {
+              temp[j] = serialInArray[i*16+j]; 
+              data[i][j] = temp[j];
+            }
+          }
+          myPort.write('A');
+          serialCount = 0;
+        }
+      }
+      
     }
   }
 }
 
 void exit() {
-  //  println("stop");//do your thing on exit here
   super.exit();//let pro-cessing carry with it's regular exit routine
   //  //myPort.write('E');
 }

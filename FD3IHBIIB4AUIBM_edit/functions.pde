@@ -23,19 +23,8 @@ public void CONNECT() {
   println("restart");
   println(serialCount);
   myPort.clear();
-  myPort.write('A');
   serialCount = 0;
-}
-
-
-// Set escape event for terminate program.
-void keyPressed() {
-  if (key == 27) { // 27 means ESC key
-    getDate();
-    saveTable(table, "data/"+str(y)+"_"+str(m)+"_"+str(d)+"_"+str(h)+"_"+str(mn)+"_"+str(s)+".csv");
-    //myPort.dispose();
-    exit(); // Stops the program
-  }
+  myPort.write('C');
 }
 
 
