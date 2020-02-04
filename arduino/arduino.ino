@@ -149,11 +149,11 @@ void loop() {
 
 
           //          //Saturation sensors, 최대값 조절
-          //          int maximum = 1024;
-          //
-          //          valor = map(valor,initMaximum, maximum,0,100);
-          //          //아두이노 연결후(압력주기 전) 초기 max값을 최소값으로, 1024를 최대값으로 Calibration 함
-          //
+                    int maximum = 1024;
+          
+                    valor = map(valor,initMaximum, maximum,0,100);
+                    //아두이노 연결후(압력주기 전) 초기 max값을 최소값으로, 1024를 최대값으로 Calibration 함
+          
           if (valor < 0)
             valor = 0; //값의 최소 최대 조절
           if (valor > 100) //0~100

@@ -118,8 +118,6 @@ void serialEvent(Serial myPort) {
 
     // read a byte from the serial port:
     int inByte = myPort.read();
-    //println("inByte : "+ inByte);
-    //println(firstContact);
 
     if (getDate == false) {
       if (inByte == 'A') {
